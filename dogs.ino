@@ -1,5 +1,8 @@
-// dsp-D8 Drum Chip (c) DSP Synthesizers 2015
-// Free for non commercial use
+/* Random Dogs Barking
+ * a direct-digital synthesis "tutorial"
+ * for the AVR, but will compile on an Arduino 
+ * Released public domain, because it's absurd, frankly.
+ */
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -14,26 +17,32 @@ static inline void setup_pwm_audio_timer(void);
 static inline void setup_sample_timer(void);
 
 const uint16_t bark_max = sizeof(WAV_bark)-1;
-volatile uint16_t bark_increment[4]={255,255,255,255};
+/* volatile uint16_t bark_increment[4]={255,255,255,255}; */
+struct Bark {
+	uint16_t increment = 255;
+	uint16_t position = 0;
+	uint16_t accumulator = 0;
+};
+volatile struct Bark bark[4];
 
 ISR(TIMER1_COMPA_vect) {
 	PORTB |= (1 << PB1); // debug, toggle pin
-	static uint16_t bark_position[4] = {0,0,0,0};
-	static uint16_t bark_accumulator[4] = {0,0,0,0};
+	/* static uint16_t bark_position[4] = {0,0,0,0}; */
+	/* static uint16_t bark_accumulator[4] = {0,0,0,0}; */
 	uint16_t total = 0;
 
 	for (uint8_t i = 0; i < 4; i++) {
-		total += pgm_read_byte_near(WAV_bark + bark_position[i]);
+		total += pgm_read_byte_near(WAV_bark + bark[i].position);
 
-		if (bark_position[i] < bark_max){    /* playing */
-			bark_accumulator[i] += bark_increment[i];
-			while (bark_accumulator[i] >= 255){
-				bark_position[i]++;
-				bark_accumulator[i] -= 255;
+		if (bark[i].position < bark_max){    /* playing */
+			bark[i].accumulator += bark[i].increment;
+			while (bark[i].accumulator >= 255){
+				bark[i].position++;
+				bark[i].accumulator -= 255;
 			}
 		} else {  /*  done playing, reset and wait  */
-			bark_position[i] = 0;
-			bark_increment[i] = 0;
+			bark[i].position = 0;
+			bark[i].increment = 0;
 		}
 	}
 	total = total / 4;
@@ -55,9 +64,9 @@ void loop()
 {  
 	_delay_ms(200);
 	for (uint8_t i=0; i < 4; i++){
-		if (bark_increment[i] == 0) {   /*  if done playing */
+		if (bark[i].increment == 0) {   /*  if done playing */
 			if (random(0,5) > 3){
-				bark_increment[i] = random(128, 512); 
+				bark[i].increment = random(128, 512); 
 			}
 		}
 	}
