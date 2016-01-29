@@ -1,0 +1,5 @@
+*.wav
+*.raw
+
+core.a
+wave2DPCM.py
