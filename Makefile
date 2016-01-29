@@ -42,8 +42,8 @@ F_CPU = 16000000L
 ## To flash, you may need to change the -P port to match your system
 ## e.g. COM3 or /dev/tty.usbserialxxxxx or whatever
 AVRDUDE_CONFIG  = $(ARDUINO_INSTALL)/hardware/tools/avr/etc/avrdude.conf
-# AVRDUDE_OPTIONS = -C $(AVRDUDE_CONFIG) -qq -p $(MCU) -c arduino -P /dev/ttyACM0 -b 115200 -D
-AVRDUDE_OPTIONS = -C $(AVRDUDE_CONFIG) -p $(MCU) -c avrftdi
+AVRDUDE_OPTIONS = -C $(AVRDUDE_CONFIG) -qq -p $(MCU) -c arduino -P /dev/ttyACM0 -b 115200 -D
+# AVRDUDE_OPTIONS = -C $(AVRDUDE_CONFIG) -p $(MCU) -c avrftdi
 
 ## These are the flags that the Arduino IDE compiles with.  They seem reasonable.
 ## -DARDUINO_AVR_UNO is specific to the Uno board
