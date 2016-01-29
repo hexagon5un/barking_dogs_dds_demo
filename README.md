@@ -22,7 +22,15 @@ If you want to reassure yourself of this, I left my pin-toggling debug code in f
 
 There are _tons_ of optimizations that could be applied to this code.  It goes with an introductory article on DDS I wrote for Hackaday (LINK!?!?), and it's built for comfort.  It ain't built for speed. 
 
+
+## Arduino??  C??
+
+I wrote the code in pretty agnostic C so that it should compile just fine once you replace `setup()` and `loop()` with `main()`.  At least it works for me.
+
+Also included, at no extra charge, my Arduino-alike Makefile, and a generic AVR-GCC Makefile (with _far_ too many frills.)
+
 ## Further work?
 
-If you took a sample, split it up intoattack, sustain, and decay phases, and then added a couple if() statements in the ISR, you'd have a decent general purpose (8-bit, 8kHz) sample player. 
+If you took a sample, split it up into attack, sustain, and decay phases, and then added a couple if() statements in the ISR, you'd have a decent general purpose (8-bit, 8kHz) sample player. 
+
 
