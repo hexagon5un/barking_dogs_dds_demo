@@ -25,9 +25,9 @@ There are _tons_ of optimizations that could be applied to this code.  It goes w
 
 ## Arduino??  C??
 
-I wrote the code in pretty agnostic C so that it should compile just fine once you replace `setup()` and `loop()` with `main()`.  At least it works for me.
+I wrote the code in pretty agnostic C so that it should compile just fine once you replace `setup()` and `loop()` with `main()`.  That's what you'll find in the `dogs_in_c` directory.  Works for me.
 
-Also included, at no extra charge, my Arduino-alike Makefile, and a generic AVR-GCC Makefile (with _far_ too many frills.)
+Also included, at no extra charge, my Arduino-alike Makefile, and a generic AVR-GCC Makefile (with _far_ too many frills) in their respective directories.
 
 ## Further work?
 
