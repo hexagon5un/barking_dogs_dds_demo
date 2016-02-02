@@ -14,8 +14,7 @@
 #define clear_bit(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define set_bit(sfr, bit)   (_SFR_BYTE(sfr) |= _BV(bit))
 
-#define ACCUMULATOR_STEPS 256
-#define SAMPLE_RATE       8000UL
+#define SAMPLE_RATE       24000UL 
 #define NUM_VOICES        4
 
 /* Init functions, defined at the bottom of the file */
@@ -65,7 +64,7 @@ void loop()
 	static uint8_t waveform=0;
 
 	voices[0].increment = scale[i];
-	_delay_ms(100);
+	_delay_ms(60);
 	i++;
 	if (i == 12){
 		i = 0;
