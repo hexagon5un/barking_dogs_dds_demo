@@ -29,11 +29,11 @@ def prettyPrint(data, perLine = 8):
     return(outString)
 
 def writeHeader(fileName, dataName, data, signedInt=True):
-    outfile = open(fileName, "w")
+    outfile = open(fileName, "a")
     if signedInt:
-        outfile.write("int8_t {}[{:d}] = {{ \n".format(dataName, len(data)))
+        outfile.write("const int8_t {}[{:d}] PROGMEM = {{ \n".format(dataName, len(data)))
     else:
-        outfile.write("uint8_t {}[{:d}] = {{ \n".format(dataName, len(data)))
+        outfile.write("const uint8_t {}[{:d}] PROGMEM = {{ \n".format(dataName, len(data)))
     outfile.write(prettyPrint(data))
     outfile.write("};\n")
     outfile.close()
@@ -71,31 +71,23 @@ def bandlimitedTriangle(maxPhase, numberPartials, length=256):
 if __name__ == "__main__":
     
     ## Full-waves, full 256 bytes, 0-255 range
-    writeHeader("fullSine.h", 'fullSine', scaleAndRound(makeSin(360)))
+    writeHeader("dds_waveforms.h", 'Sine', scaleAndRound(makeSin(360)))
 
     triangleWave = range(0,64)
     triangleWave.extend(range(64, -64, -1))
     triangleWave.extend(range(-64, 0, 1))
     triangleWave = scaleAndRound(triangleWave)
-    writeHeader("fullTriangle.h", 'fullTriangle', triangleWave)
+    writeHeader("dds_waveforms.h", 'Triangle', triangleWave)
 
     for numberFrequencies in [3,7,15]:
         saw = scaleAndRound(bandlimitedSawtooth(360, numberFrequencies))
-        writeHeader("fullSaw{}.h".format(numberFrequencies), 
-                    'fullSaw{}'.format(numberFrequencies), saw)
+        writeHeader("dds_waveforms.h".format(numberFrequencies), 
+                    'Saw{}'.format(numberFrequencies), saw)
         tri = scaleAndRound(bandlimitedTriangle(360, numberFrequencies))
-        writeHeader("fullTri{}.h".format(numberFrequencies), 
-                    'fullTri{}'.format(numberFrequencies), tri)
+        writeHeader("dds_waveforms.h".format(numberFrequencies), 
+                    'Tri{}'.format(numberFrequencies), tri)
         square = scaleAndRound(bandlimitedSquare(360, numberFrequencies))
-        writeHeader("fullSquare{}.h".format(numberFrequencies), 
-                    'fullSquare{}'.format(numberFrequencies), square)
+        writeHeader("dds_waveforms.h".format(numberFrequencies), 
+                    'Square{}'.format(numberFrequencies), square)
 
-    ## Note that if you define / use too many different waveforms, 
-    ## and you don't store them in PROGMEM in your AVR C routines,
-    ## you might run the chip out of RAM, which causes strange and
-    ## nearly impossible-to-diagnose glitches.
-    
-    ## So here we're breaking each waveform up into its own include file.
-    ## There are ways of storing them all in program memory, and we'll
-    ##  see examples of that in later chapters.
     

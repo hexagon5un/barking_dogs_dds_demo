@@ -8,7 +8,7 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include <avr/pgmspace.h>
-#include "fullSine.h"
+#include "dds_waveforms.h"
 #include "scale16.h"
 
 #define clear_bit(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -16,18 +16,17 @@
 
 #define ACCUMULATOR_STEPS 256
 #define SAMPLE_RATE       8000UL
-#define NUM_VOICES        1
+#define NUM_VOICES        4
 
 /* Init functions, defined at the bottom of the file */
 static inline void setup_pwm_audio_timer(void);
 static inline void setup_sample_timer(void);
 
-const uint16_t sample_max = sizeof(sine_wave);  /* for 8-bit samples */
-
 struct DDS {
 	uint16_t increment;
 	uint16_t position;
 	uint16_t accumulator;
+	const int8_t* sample;   /* pointer to beginning of sample in memory */
 };
 volatile struct DDS voices[NUM_VOICES];
 
@@ -36,18 +35,10 @@ ISR(TIMER1_COMPA_vect) {
 	int16_t total = 0;
 
 	for (uint8_t i = 0; i < NUM_VOICES; i++) {
-		total += (int8_t) pgm_read_byte_near(sine_wave + voices[i].position);
-
+		total += (int8_t) pgm_read_byte_near(voices[i].sample + voices[i].position);
 		/* Take an increment step */
 		voices[i].accumulator += voices[i].increment;
-		while (voices[i].accumulator >= ACCUMULATOR_STEPS){
-			voices[i].accumulator -= ACCUMULATOR_STEPS;
-			voices[i].position++;
-			if (voices[i].position == sample_max){    /* loop back around */
-				voices[i].position = 0;
-			}
-		}
-
+		voices[i].position = voices[i].accumulator >> 8;
 	}
 	total = total / NUM_VOICES;
 	OCR2A = total + 128; // add in offset to make it 0-255 rather than -128 to 127
@@ -62,19 +53,56 @@ void setup()
 	setup_pwm_audio_timer();
 	set_bit(DDRB, PB1); // debugging 
 	
-	/* These constants are defined in "scale16.h" */
-	voices[0].increment = C2;
+	voices[0].sample = Sine;
+	voices[1].sample = Tri3;
+	voices[2].sample = Saw3;
+	voices[3].sample = Square3;
 }
 
 void loop() 
 {  
 	static uint8_t i=0;
+	static uint8_t waveform=0;
+
 	voices[0].increment = scale[i];
+	_delay_ms(100);
 	i++;
-	if (i == (sizeof(scale)/sizeof(scale[0])) ){
+	if (i == 12){
 		i = 0;
+		switch (waveform){
+		case(0):
+			voices[0].sample = Sine;
+			voices[1].sample = Sine;
+			voices[2].sample = Sine;
+			voices[3].sample = Sine;
+			waveform=1;
+			break;
+		case(1):
+			voices[0].sample = Tri3;
+			voices[1].sample = Tri3;
+			voices[2].sample = Tri3;
+			voices[3].sample = Tri3;
+			waveform=2;
+			break;
+		case(2):
+			voices[0].sample = Saw3;
+			voices[1].sample = Saw3;
+			voices[2].sample = Saw3;
+			voices[3].sample = Saw3;
+			waveform=3;
+			break;
+		case(3):
+			voices[0].sample = Square3;
+			voices[1].sample = Square3;
+			voices[2].sample = Square3;
+			voices[3].sample = Square3;
+			waveform=0;
+			break;
+		default:
+			waveform = 0;
+		}
+
 	}
-	_delay_ms(500);
 }
 
 

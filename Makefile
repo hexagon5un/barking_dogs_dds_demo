@@ -9,7 +9,7 @@
 ## You may need to configure some stuff.
 
 ## This is the name of the file (drop the .ino) you're trying to build
-TARGET = dogs
+TARGET = dds
 
 ## The location of my arduino install.  This will probably be different for you.
 
