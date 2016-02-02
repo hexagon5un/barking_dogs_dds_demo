@@ -2,7 +2,7 @@
 
 A quick silly demo of one way to implement DDS sample playback on an AVR/Arduino.  It plays up to four simultaneous dog-barks at different pitches. But your job is to make something cooler out of it, either by replacing the "bark" sample, or by adding a keyboard, or...
 
-The samples themselves are 8-bit @ 8kHz mono.  If you've got something like this (or can get it out of Audacity or sox) then you can tweak the included Python file to make a suitable C header with the data.
+The samples themselves are 8-bit @ 8kHz mono.  If you want to replace them, just save your sample as a mono, 8kHz, 8-bit WAV file (e.g. with Audacity or sox) and then you can tweak the included Python file to make a suitable C header with your data.
 
 ## PWM
 
@@ -12,7 +12,7 @@ Audio out is on pin 11, PB3 / OC2A.  It's directly toggled by Timer2 in hardware
 
 ## Interrupts
 
-The action in the code is all in the periodic interrupt routine triggered on Timer 1.  It reads each sample from memory, adds them together, and divides by four.  If a "bark"'s increment value is set to zero, it doesn't play.  If it's non-zero, it takes off.  That's all there is to it, really.  This means that you can trigger a bark by setting the pitch: `bark[1].increment = 256` will set one off at the sampled pitch.
+The action in the code is all in the periodic interrupt routine triggered on Timer 1.  It reads each sample from memory, adds them together, and divides by the number of voices.  If a "bark"'s increment value is set to zero, it doesn't play.  If it's non-zero, it takes off.  That's all there is to it, really.  This means that you can trigger a bark by setting the pitch: `bark[1].increment = 256` will set one off at the sampled pitch.
 
 The 4-voice lookup and mixing takes about 10-20% of the processing time, which is a heck of a lot to be running inside a blocking interrupt.  But if you consider that sample-loading is probably the highest priority task, and that basically you're going to want to scan keys or something equally trivial with the rest of the CPU time, it's not a problem.  
 
