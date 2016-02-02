@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <avr/pgmspace.h>
 #include "WAV_bark.h"
+#include "fullSine.h"
 #include "scale16.h"
 
 #define clear_bit(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -23,6 +24,7 @@ static inline void setup_pwm_audio_timer(void);
 static inline void setup_sample_timer(void);
 
 const uint16_t bark_max = sizeof(WAV_bark)-1;
+/* const uint16_t bark_max = sizeof(sine_wave)-1; */
 
 struct Bark {
 	uint16_t increment = ACCUMULATOR_INCREMENT;
@@ -33,10 +35,11 @@ volatile struct Bark bark[NUM_BARKERS];
 
 ISR(TIMER1_COMPA_vect) {
 	PORTB |= (1 << PB1); // debug, toggle pin
-	uint16_t total = 0;
+	int16_t total = 0;
 
 	for (uint8_t i = 0; i < NUM_BARKERS; i++) {
-		total += pgm_read_byte_near(WAV_bark + bark[i].position);
+		/* total += (int8_t) pgm_read_byte_near(sine_wave + bark[i].position); */
+		total += (int8_t) pgm_read_byte_near(WAV_bark + bark[i].position);
 
 		if (bark[i].position < bark_max){    /* playing */
 			bark[i].accumulator += bark[i].increment;
@@ -50,7 +53,7 @@ ISR(TIMER1_COMPA_vect) {
 		}
 	}
 	total = total / NUM_BARKERS;
-	OCR2A = total; 
+	OCR2A = total + 128; // add in offset to make it 0-255 rather than -128 to 127
 	PORTB &= ~(1 << PB1); // debug, toggle pin
 }
 

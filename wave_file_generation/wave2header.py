@@ -11,7 +11,9 @@ def unpackMono(waveFile):
         data.append(unpack("B", w.readframes(1))[0])
     return(data)
 
-def createHeader(basename, data):
+def createHeader(basename, data, signed=True):
+    if signed:
+        data = [x-128 for x in data]
     outfile = open("WAV_" + basename + ".h", "w")
     outfile.write('const uint8_t WAV_%s[%d] PROGMEM = {\n' % (basename, len(data)))
     i = 0

@@ -4,3 +4,6 @@
 core.a
 wave2DPCM.py
 dogs.cpp
+wave_file_generation/*.h 
+edit.sh
+tags
