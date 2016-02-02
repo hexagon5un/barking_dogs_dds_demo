@@ -31,7 +31,7 @@ def makeDefines(basePitch, numOctaves):
 if __name__ == "__main__":
     
     ## Change these if you like
-    BASEPITCH = 2048/4
+    BASEPITCH = 1024 
     OCTAVES   = 4
     OUTFILE   = "scale16.h"
     
