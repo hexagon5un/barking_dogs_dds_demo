@@ -1,5 +1,5 @@
 /* Simple Sinewave DDS Routine
- * Inefficient version.  For pedagogical use only!
+ * Speedy version -- using bit-shifts in the accumulator.
  * See https://github.com/hexagon5un/barking_dogs_dds_demo 
  * Public Domain
  */
@@ -44,7 +44,7 @@ ISR(TIMER1_COMPA_vect) {
 	PORTB &= ~(1 << PB1); // debug, toggle pin
 }
 
-uint16_t scale[] = {C1, D1, E1, F1, G1, A1, B1, C2, D2, E2, F2, G2, A2, B2, C3, D3, E3, F3, G3, A3, B3};
+uint16_t scale[] = {C0, D0, E0, F0, G0, A0, B0, C1, D1, E1, F1, G1, A1, B1, C2, D2, E2, F2, G2, A2, B2};
 
 void setup() 
 {
@@ -61,12 +61,16 @@ void setup()
 void loop() 
 {  
 	static uint8_t i=0;
-	static uint8_t waveform=0;
+	static uint8_t waveform=3;
 
 	voices[0].increment = scale[i];
+	voices[1].increment = scale[i];
+	voices[2].increment = scale[i];
+	voices[3].increment = scale[i];
 	_delay_ms(60);
 	i++;
-	if (i == 12){
+	if (i == 8){
+		_delay_ms(100);
 		i = 0;
 		switch (waveform){
 		case(0):
@@ -77,24 +81,24 @@ void loop()
 			waveform=1;
 			break;
 		case(1):
-			voices[0].sample = Tri3;
-			voices[1].sample = Tri3;
-			voices[2].sample = Tri3;
-			voices[3].sample = Tri3;
+			voices[0].sample = Tri15;
+			voices[1].sample = Tri15;
+			voices[2].sample = Tri15;
+			voices[3].sample = Tri15;
 			waveform=2;
 			break;
 		case(2):
-			voices[0].sample = Saw3;
-			voices[1].sample = Saw3;
-			voices[2].sample = Saw3;
-			voices[3].sample = Saw3;
+			voices[0].sample = Saw15;
+			voices[1].sample = Saw15;
+			voices[2].sample = Saw15;
+			voices[3].sample = Saw15;
 			waveform=3;
 			break;
 		case(3):
-			voices[0].sample = Square3;
-			voices[1].sample = Square3;
-			voices[2].sample = Square3;
-			voices[3].sample = Square3;
+			voices[0].sample = Square15;
+			voices[1].sample = Square15;
+			voices[2].sample = Square15;
+			voices[3].sample = Square15;
 			waveform=0;
 			break;
 		default:
