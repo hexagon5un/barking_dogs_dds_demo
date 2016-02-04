@@ -13,45 +13,52 @@
 
 #define clear_bit(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define set_bit(sfr, bit)   (_SFR_BYTE(sfr) |= _BV(bit))
+#define LED_ON              set_bit(PORTB, PB1) // debug, pin PB1, Arduino D9
+#define LED_OFF             clear_bit(PORTB, PB1)
+#define LED_INIT	        set_bit(DDRB, PB1) /* debugging -- this pin toggled in ISR  */
 
-#define ACCUMULATOR_INCREMENT 2048
+  /* Note: If ACCUMULATOR_STEPS is a power of two, 
+   * the math works fast and all is well.
+   * If not, the division and modulo by ACCUMULATOR_STEPS kills it.
+   * */
+#define ACCUMULATOR_STEPS 2048 
 #define SAMPLE_RATE           8000UL
 #define NUM_BARKERS	          4
 
 /* Init functions, defined at the bottom of the file */
 static inline void setup_pwm_audio_timer(void);
 static inline void setup_sample_timer(void);
+static inline void init_barking_leds(void);
 
-const uint16_t bark_max = sizeof(WAV_bark)-1;
+const uint16_t bark_max = sizeof(WAV_bark);
 
 struct Bark {
-	uint16_t increment = ACCUMULATOR_INCREMENT;
+	uint16_t increment = ACCUMULATOR_STEPS;
 	uint16_t position = 0;
 	uint16_t accumulator = 0;
 };
 volatile struct Bark bark[NUM_BARKERS];
 
 ISR(TIMER1_COMPA_vect) {
-	PORTB |= (1 << PB1); // debug, toggle pin
-	uint16_t total = 0;
+	LED_ON; // debug, toggle pin
+	int16_t total = 0;
 
 	for (uint8_t i = 0; i < NUM_BARKERS; i++) {
-		total += pgm_read_byte_near(WAV_bark + bark[i].position);
+		total += (int8_t)pgm_read_byte_near(WAV_bark + bark[i].position);
 
 		if (bark[i].position < bark_max){    /* playing */
 			bark[i].accumulator += bark[i].increment;
-			while (bark[i].accumulator >= ACCUMULATOR_INCREMENT){
-				bark[i].position++;
-				bark[i].accumulator -= ACCUMULATOR_INCREMENT;
-			}
+			bark[i].position += bark[i].accumulator / ACCUMULATOR_STEPS; 
+			bark[i].accumulator = bark[i].accumulator % ACCUMULATOR_STEPS;
 		} else {  /*  done playing, reset and wait  */
 			bark[i].position = 0;
 			bark[i].increment = 0;
+			clear_bit(PORTC, i);  /* Turn off goofy LED */
 		}
 	}
 	total = total / NUM_BARKERS;
-	OCR2A = total; 
-	PORTB &= ~(1 << PB1); // debug, toggle pin
+	OCR2A = total + 128; // add in offset to make it 0-255 rather than -128 to 127
+	LED_OFF; // debug, toggle pin
 }
 
 // These constants are defined in "scale16.h"
@@ -62,30 +69,38 @@ void setup()
 {
 	setup_sample_timer();
 	setup_pwm_audio_timer();
+	init_barking_leds();
 
 	set_bit(DDRB, PB1); // debugging 
 
 	/* Bark once at native pitch */
-	bark[0].increment = ACCUMULATOR_INCREMENT;
+	bark[0].increment = ACCUMULATOR_STEPS;
+	bark[1].increment = ACCUMULATOR_STEPS;
+	_delay_ms(300);
+	bark[0].increment = ACCUMULATOR_STEPS;
+	bark[1].increment = ACCUMULATOR_STEPS;
+	_delay_ms(500);
+	bark[0].increment = ACCUMULATOR_STEPS;
 	_delay_ms(1000);
 
 	/* Demo the entire scale */
 	for (uint8_t i=0; i < scale_max; i++){
 		bark[i % NUM_BARKERS].increment = scale[i];
-		_delay_ms(150);
+		_delay_ms(400);
 	}
 }
 
 void loop() 
 {  
-	_delay_ms(120);
 	for (uint8_t i=0; i < NUM_BARKERS; i++){
 		if (bark[i].increment == 0) { /* only start another if done playing */
-			if (rand() > 127){        /* chance of barking: rand is 0-255   */
+			if ((uint8_t) rand() > 185){        
 				bark[i].increment = scale[ rand() % scale_max ];
+				set_bit(PORTC, i);   /* Turn on LED for light show. */
 			}
 		}
 	}
+	_delay_ms(200);
 }
 
 
@@ -119,4 +134,12 @@ static inline void setup_pwm_audio_timer(){
 	// output on pin 11 -- OC2A 
 	set_bit(DDRB, PB3);  /* or pinMode(11, OUTPUT) in Arduinese */
 }
+
+static inline void init_barking_leds(void){
+	set_bit(DDRC, PC0);
+	set_bit(DDRC, PC1);
+	set_bit(DDRC, PC2);
+	set_bit(DDRC, PC3);
+}
+
 
