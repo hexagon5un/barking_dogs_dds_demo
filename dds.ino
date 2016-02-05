@@ -23,7 +23,6 @@ static inline void setup_sample_timer(void);
 
 struct DDS {
 	uint16_t increment;
-	uint16_t position;
 	uint16_t accumulator;
 	const int8_t* sample;   /* pointer to beginning of sample in memory */
 };
@@ -34,10 +33,8 @@ ISR(TIMER1_COMPA_vect) {
 	int16_t total = 0;
 
 	for (uint8_t i = 0; i < NUM_VOICES; i++) {
-		total += (int8_t) pgm_read_byte_near(voices[i].sample + voices[i].position);
-		/* Take an increment step */
+		total += (int8_t) pgm_read_byte_near(voices[i].sample + (voices[i].accumulator >> 8));
 		voices[i].accumulator += voices[i].increment;
-		voices[i].position = voices[i].accumulator >> 8;
 	}
 	total = total / NUM_VOICES;
 	OCR2A = total + 128; // add in offset to make it 0-255 rather than -128 to 127
