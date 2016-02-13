@@ -41,7 +41,7 @@ ISR(TIMER1_COMPA_vect) {
 	PORTB &= ~(1 << PB1); // debug, toggle pin
 }
 
-uint16_t scale[] = {C0, D0, E0, F0, G0, A0, B0, C1, D1, E1, F1, G1, A1, B1, C2, D2, E2, F2, G2, A2, B2};
+uint16_t scale[] = {NOTE_C0, NOTE_D0, NOTE_E0, NOTE_F0, NOTE_G0, NOTE_A0, NOTE_B0, NOTE_C1, NOTE_D1, NOTE_E1, NOTE_F1, NOTE_G1, NOTE_A1, NOTE_B1, NOTE_C2, NOTE_D2, NOTE_E2, NOTE_F2, NOTE_G2, NOTE_A2, NOTE_B2};
 
 void setup() 
 {
