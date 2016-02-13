@@ -55,7 +55,7 @@ ISR(TIMER1_COMPA_vect) {
 }
 
 // These constants are defined in "scale16.h"
-uint16_t scale[] = {C1, E1, G1, C2, E2, G2, C3};
+uint16_t scale[] = {NOTE_C1, NOTE_E1, NOTE_G1, NOTE_C2, NOTE_E2, NOTE_G2, NOTE_C3};
 const uint8_t scale_max = sizeof(scale)/sizeof(scale[0]);
 
 void setup() 
