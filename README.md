@@ -4,6 +4,14 @@ A quick silly demo of one way to implement DDS sample playback on an AVR/Arduino
 
 The samples themselves are 8-bit @ 8kHz mono.  If you want to replace them, just save your sample as a mono, 8kHz, 8-bit WAV file (e.g. with Audacity or sox) and then you can tweak the included Python file to make a suitable C header with your data.
 
+## Download for Arduino, or compile in C
+
+To run this on Arduino, download the [linked zip file](https://github.com/hexagon5un/barking_dogs_dds_demo/archive/master.zip) and move it to your sketches directory.  Rename it to "dogs" and fire up Arduino.  You should be good to go.
+
+If you're interested in the synthetic waveforms code, I've pushed up a branch for that too.  Download [this zip file](https://github.com/hexagon5un/barking_dogs_dds_demo/archive/all_waveforms_demo.zip) and move it to "dds" in your sketches directory.  (It's got some sweet Python band-limited waveform synthesis code if I do say so myself.)
+
+I wrote the code in pretty agnostic C so that it should compile just fine once you replace `setup()` and `loop()` with `main()`.  That's what you'll find in the `dogs_in_c` directory.  Works for me.  Also included, at no extra charge, my Arduino-alike Makefile, and a generic AVR-GCC Makefile (with _far_ too many frills) in their respective directories.  Feel free to ignore or copy.
+
 ## PWM
 
 The PWM rate is as fast as it could be: 16 MHz / 256 = 62 kHz.  You're still going to want to filter out some of the high-frequency hash.  I used a single-pole RC filter: a 1K resistor from the AVR's output with a 0.1 uF capacitor to ground.  Not high-tech, but gets the job done.
@@ -20,16 +28,8 @@ If you want to reassure yourself of this, I left my pin-toggling debug code in f
 
 ## Optimizations
 
-There are _tons_ of optimizations that could be applied to this code.  It goes with an introductory article on DDS I wrote for Hackaday (LINK!?!?), and it's built for comfort.  It ain't built for speed. 
+There are _tons_ of optimizations that could be applied to this code.  It goes with an introductory [article on DDS I wrote for Hackaday](http://hackaday.com/2016/02/12/embed-with-elliot-audio-playback-with-direct-digital-synthesis/), and it's built for comfort.  It ain't built for speed. 
 
-
-## Arduino??  C??
-
-To run this on Arduino, download the [linked zip file](https://github.com/hexagon5un/barking_dogs_dds_demo/archive/master.zip) and move it to your sketches directory.  Rename it to "dogs" and fire up Arduino.  You should be good to go.
-
-I wrote the code in pretty agnostic C so that it should compile just fine once you replace `setup()` and `loop()` with `main()`.  That's what you'll find in the `dogs_in_c` directory.  Works for me.
-
-Also included, at no extra charge, my Arduino-alike Makefile, and a generic AVR-GCC Makefile (with _far_ too many frills) in their respective directories.
 
 ## Further work?
 
